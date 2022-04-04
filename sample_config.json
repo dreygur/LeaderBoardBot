@@ -1,0 +1,8 @@
+{
+  "name": "LeaderboardBot",
+  "bot_token": "",
+  "db_url": "",
+  "admin_roles": ["admins"],
+  "logo_url": "https://i.imgur.com/wSTFkRM.png",
+  "activities": ["text", "reaction", "voice", "streaming"]
+}
