@@ -7,13 +7,20 @@ import (
 	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/hooks"
 	"github.com/dreygur/leaderboardbot/lib"
+	"github.com/dreygur/leaderboardbot/settings"
 )
 
-// Configurations
-var config = lib.LoadConfig()
+var (
+	// Configurations
+	config = lib.LoadConfig()
 
-// Database Connection
-var collection = database.ConnectDB()
+	// Database Connection
+	collection = settings.NewDatabase(database.Database{
+		Address:    config.DatabaseURL,
+		Name:       config.Database.Name,
+		Collection: config.Database.Collection,
+	}).GetCollection()
+)
 
 func configPointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*discordgo.MessageEmbed {
 	activity := i.ApplicationCommandData().Options[0].StringValue()

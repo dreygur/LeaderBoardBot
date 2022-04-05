@@ -20,11 +20,16 @@ func ReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 	update := bson.M{
 		"$inc": bson.M{
 			"points":              lib.POINTS["reaction"],
-			"activities.reaction": lib.POINTS["reaction"],
+			"activities.reaction": 1,
 		},
 	}
 
-	_, err := collection.UpdateOne(context.TODO(), bson.M{"user_id": m.UserID}, update, options.Update().SetUpsert(true))
+	_, err := collection.UpdateOne(
+		context.TODO(),
+		bson.M{"user_id": m.UserID},
+		update,
+		options.Update().SetUpsert(true),
+	)
 
 	if err != nil {
 		lib.PrintLog(fmt.Sprintf("Error in addPointHandler: %v", err), "error")

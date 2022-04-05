@@ -13,10 +13,10 @@ import (
 var err error
 
 type Database struct {
-	Address    string
-	Name       string
-	Collection string
-	Client     *mongo.Client
+	Address    string        `json:"db_url"`
+	Name       string        `json:"name"`
+	Collection string        `json:"collection"`
+	Client     *mongo.Client // mongo client
 }
 
 func (d *Database) ConnectDB() *mongo.Collection {

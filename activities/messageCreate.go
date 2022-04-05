@@ -7,11 +7,22 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/lib"
+	"github.com/dreygur/leaderboardbot/settings"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var collection = database.ConnectDB()
+var (
+	// Configurations
+	config = lib.LoadConfig()
+
+	// Database Connection
+	collection = settings.NewDatabase(database.Database{
+		Address:    config.DatabaseURL,
+		Name:       config.Database.Name,
+		Collection: config.Database.Collection,
+	}).GetCollection()
+)
 
 func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore all messages created by the bot itself
@@ -23,11 +34,17 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	update := bson.M{
 		"$inc": bson.M{
 			"points":          lib.POINTS["text"],
-			"activities.text": lib.POINTS["text"],
+			"activities.text": 1,
 		},
 	}
 
-	_, err := collection.UpdateOne(context.TODO(), bson.M{"user_id": m.Author.ID}, update, options.Update().SetUpsert(true))
+	_, err := collection.UpdateOne(
+		context.TODO(),
+		bson.M{"user_id": m.Author.ID},
+		update,
+		options.Update().SetUpsert(true),
+	)
+
 	if err != nil {
 		lib.PrintLog(fmt.Sprintf("Error in addPointHandler: %v", err), "error")
 	}

@@ -7,13 +7,10 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/dreygur/leaderboardbot/activities"
-	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/events"
 	"github.com/dreygur/leaderboardbot/handlers"
 	"github.com/dreygur/leaderboardbot/lib"
 )
-
-var ()
 
 func main() {
 	// godotenv.Load()
@@ -62,5 +59,11 @@ func main() {
 
 	// Stop the bot
 	defer dg.Close()
-	defer database.Disconnect()
+
+	/**
+	 * Not Disconnecting Database this time
+	 * Will implement this one in future
+	 * though this is an intended bug!
+	 */
+	// defer database.Disconnect()
 }

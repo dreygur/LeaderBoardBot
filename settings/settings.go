@@ -6,16 +6,25 @@ import (
 )
 
 type Config interface {
-	SetDB(db *database.Database) error
 	GetCollection() *mongo.Collection
+	Diconnect()
 }
 
-type Conf struct{}
+var (
+	d database.Database
+)
 
-func (c *Conf) SetDB(db *database.Database) *Config {
-	return nil
+type conf struct{}
+
+func NewDatabase(db database.Database) Config {
+	d = db
+	return &conf{}
 }
 
-func (c *Conf) GetCollection() *Config {
-	return nil
+func (*conf) GetCollection() *mongo.Collection {
+	return d.ConnectDB()
+}
+
+func (*conf) Diconnect() {
+	d.Disconnect()
 }

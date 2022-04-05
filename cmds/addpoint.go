@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/hooks"
 	"github.com/dreygur/leaderboardbot/lib"
 	"go.mongodb.org/mongo-driver/bson"
@@ -63,14 +62,17 @@ func addPointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*di
 	}
 
 	if hooks.CheckRole(s, i) {
+		update := bson.M{
+			"$inc": bson.M{
+				"points": int(points),
+			},
+		}
 		_, err := collection.UpdateOne(
 			context.TODO(),
-			bson.M{"username": userName},
-			bson.M{
-				"$inc": database.User{
-					Points: int(points),
-				},
-			}, options.Update().SetUpsert(true))
+			bson.M{"user_id": i.Member.User.ID},
+			update,
+			options.Update().SetUpsert(true),
+		)
 
 		if err != nil {
 			lib.PrintLog(fmt.Sprintf("Error in addPointHandler: %v", err), "error")
