@@ -13,6 +13,8 @@ import (
 	"github.com/dreygur/leaderboardbot/lib"
 )
 
+var ()
+
 func main() {
 	// godotenv.Load()
 	config := lib.LoadConfig()
