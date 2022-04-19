@@ -3,6 +3,7 @@ package cmds
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/dreygur/leaderboardbot/hooks"
+	"github.com/dreygur/leaderboardbot/repo"
 )
 
 func userInvitedHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*discordgo.MessageEmbed {
@@ -18,11 +19,11 @@ func userInvitedHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []
 			Title:       "Position",
 			Description: "Position",
 			Author: &discordgo.MessageEmbedAuthor{
-				Name: config.Name,
+				Name: repo.Config.Name,
 			},
 			Color: 0x1232D4,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: config.LogoURL,
+				URL: repo.Config.LogoURL,
 			},
 			Fields: []*discordgo.MessageEmbedField{
 				{

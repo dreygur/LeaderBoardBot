@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/dreygur/leaderboardbot/lib"
+	"github.com/dreygur/leaderboardbot/repo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -24,7 +25,7 @@ func ReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 		},
 	}
 
-	_, err := collection.UpdateOne(
+	_, err := repo.Collection.UpdateOne(
 		context.TODO(),
 		bson.M{"user_id": m.UserID},
 		update,

@@ -8,6 +8,7 @@ import (
 	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/hooks"
 	"github.com/dreygur/leaderboardbot/lib"
+	"github.com/dreygur/leaderboardbot/repo"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -20,7 +21,7 @@ func pointsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*disc
 	}
 
 	var user *database.User
-	err := collection.FindOne(context.Background(), bson.M{"username": userName}).Decode(&user)
+	err := repo.Collection.FindOne(context.Background(), bson.M{"username": userName}).Decode(&user)
 	if err != nil {
 		lib.PrintLog(fmt.Sprintf("Error getting user: %v", err), "error")
 	}
@@ -30,11 +31,11 @@ func pointsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*disc
 			Title:       "Points",
 			Description: "Points",
 			Author: &discordgo.MessageEmbedAuthor{
-				Name: config.Name,
+				Name: repo.Config.Name,
 			},
 			Color: 0x3349FF,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: config.LogoURL,
+				URL: repo.Config.LogoURL,
 			},
 			Fields: []*discordgo.MessageEmbedField{
 				{

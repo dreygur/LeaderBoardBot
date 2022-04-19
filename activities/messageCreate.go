@@ -5,24 +5,23 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/lib"
-	"github.com/dreygur/leaderboardbot/settings"
+	"github.com/dreygur/leaderboardbot/repo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var (
-	// Configurations
-	config = lib.LoadConfig()
+// var (
+// 	// Configurations
+// 	config = lib.LoadConfig()
 
-	// Database Connection
-	collection = settings.NewDatabase(database.Database{
-		Address:    config.DatabaseURL,
-		Name:       config.Database.Name,
-		Collection: config.Database.Collection,
-	}).GetCollection()
-)
+// 	// Database Connection
+// 	collection = settings.NewDatabase(database.Database{
+// 		Address:    config.DatabaseURL,
+// 		Name:       config.Database.Name,
+// 		Collection: config.Database.Collection,
+// 	}).GetCollection()
+// )
 
 func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore all messages created by the bot itself
@@ -38,7 +37,7 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		},
 	}
 
-	_, err := collection.UpdateOne(
+	_, err := repo.Collection.UpdateOne(
 		context.TODO(),
 		bson.M{"user_id": m.Author.ID},
 		update,

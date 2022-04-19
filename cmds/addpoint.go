@@ -7,6 +7,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/dreygur/leaderboardbot/hooks"
 	"github.com/dreygur/leaderboardbot/lib"
+	"github.com/dreygur/leaderboardbot/repo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -26,11 +27,11 @@ func addPointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*di
 			Title:       "Add Point",
 			Description: "Add point to user",
 			Author: &discordgo.MessageEmbedAuthor{
-				Name: config.Name,
+				Name: repo.Config.Name,
 			},
 			Color: 0x179ED1,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: config.LogoURL,
+				URL: repo.Config.LogoURL,
 			},
 			Fields: []*discordgo.MessageEmbedField{
 				{
@@ -46,11 +47,11 @@ func addPointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*di
 			Title:       "Add Point",
 			Description: "Add point to user",
 			Author: &discordgo.MessageEmbedAuthor{
-				Name: config.Name,
+				Name: repo.Config.Name,
 			},
 			Color: 0x179ED1,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: config.LogoURL,
+				URL: repo.Config.LogoURL,
 			},
 			Fields: []*discordgo.MessageEmbedField{
 				{
@@ -67,7 +68,7 @@ func addPointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*di
 				"points": int(points),
 			},
 		}
-		_, err := collection.UpdateOne(
+		_, err := repo.Collection.UpdateOne(
 			context.TODO(),
 			bson.M{"user_id": i.Member.User.ID},
 			update,

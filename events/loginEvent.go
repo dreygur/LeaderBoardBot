@@ -2,21 +2,7 @@ package events
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/lib"
-	"github.com/dreygur/leaderboardbot/settings"
-)
-
-var (
-	// Configurations
-	config = lib.LoadConfig()
-
-	// Database Connection
-	collection = settings.NewDatabase(database.Database{
-		Address:    config.DatabaseURL,
-		Name:       config.Database.Name,
-		Collection: config.Database.Collection,
-	}).GetCollection()
 )
 
 func LoginEvent(s *discordgo.Session, r *discordgo.Ready) {
