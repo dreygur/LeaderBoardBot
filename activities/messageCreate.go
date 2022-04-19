@@ -11,18 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// var (
-// 	// Configurations
-// 	config = lib.LoadConfig()
-
-// 	// Database Connection
-// 	collection = settings.NewDatabase(database.Database{
-// 		Address:    config.DatabaseURL,
-// 		Name:       config.Database.Name,
-// 		Collection: config.Database.Collection,
-// 	}).GetCollection()
-// )
-
 func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore all messages created by the bot itself
 	// This isn't required in this specific example but it's a good practice.
