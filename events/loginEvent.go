@@ -2,12 +2,8 @@ package events
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/lib"
 )
-
-// Database Collection
-var collection = database.ConnectDB()
 
 func LoginEvent(s *discordgo.Session, r *discordgo.Ready) {
 	// Log the new Username to Console

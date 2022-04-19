@@ -12,6 +12,10 @@ type Config struct {
 	Name        string   `json:"name"`
 	LogoURL     string   `json:"logo_url"`
 	Activities  []string `json:"activities"`
+	Database    struct {
+		Name       string `json:"name"`
+		Collection string `json:"collection"`
+	} `json:"database"`
 }
 
 func LoadConfig() *Config {

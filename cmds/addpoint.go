@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/hooks"
 	"github.com/dreygur/leaderboardbot/lib"
+	"github.com/dreygur/leaderboardbot/repo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -27,11 +27,11 @@ func addPointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*di
 			Title:       "Add Point",
 			Description: "Add point to user",
 			Author: &discordgo.MessageEmbedAuthor{
-				Name: config.Name,
+				Name: repo.Config.Name,
 			},
 			Color: 0x179ED1,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: config.LogoURL,
+				URL: repo.Config.LogoURL,
 			},
 			Fields: []*discordgo.MessageEmbedField{
 				{
@@ -47,11 +47,11 @@ func addPointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*di
 			Title:       "Add Point",
 			Description: "Add point to user",
 			Author: &discordgo.MessageEmbedAuthor{
-				Name: config.Name,
+				Name: repo.Config.Name,
 			},
 			Color: 0x179ED1,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: config.LogoURL,
+				URL: repo.Config.LogoURL,
 			},
 			Fields: []*discordgo.MessageEmbedField{
 				{
@@ -63,14 +63,17 @@ func addPointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*di
 	}
 
 	if hooks.CheckRole(s, i) {
-		_, err := collection.UpdateOne(
+		update := bson.M{
+			"$inc": bson.M{
+				"points": int(points),
+			},
+		}
+		_, err := repo.Collection.UpdateOne(
 			context.TODO(),
-			bson.M{"username": userName},
-			bson.M{
-				"$inc": database.User{
-					Points: int(points),
-				},
-			}, options.Update().SetUpsert(true))
+			bson.M{"user_id": i.Member.User.ID},
+			update,
+			options.Update().SetUpsert(true),
+		)
 
 		if err != nil {
 			lib.PrintLog(fmt.Sprintf("Error in addPointHandler: %v", err), "error")

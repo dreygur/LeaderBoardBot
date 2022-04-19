@@ -4,16 +4,10 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/hooks"
 	"github.com/dreygur/leaderboardbot/lib"
+	"github.com/dreygur/leaderboardbot/repo"
 )
-
-// Configurations
-var config = lib.LoadConfig()
-
-// Database Connection
-var collection = database.ConnectDB()
 
 func configPointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*discordgo.MessageEmbed {
 	activity := i.ApplicationCommandData().Options[0].StringValue()
@@ -26,11 +20,11 @@ func configPointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []
 			Title:       "Points",
 			Description: "Points",
 			Author: &discordgo.MessageEmbedAuthor{
-				Name: config.Name,
+				Name: repo.Config.Name,
 			},
 			Color: 0x3349FF,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: config.LogoURL,
+				URL: repo.Config.LogoURL,
 			},
 			Fields: []*discordgo.MessageEmbedField{
 				{

@@ -3,6 +3,7 @@ package cmds
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/dreygur/leaderboardbot/hooks"
+	"github.com/dreygur/leaderboardbot/repo"
 )
 
 func HelpMessageHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*discordgo.MessageEmbed {
@@ -11,11 +12,11 @@ func HelpMessageHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []
 			Title:       "Help",
 			Description: "This is a help message",
 			Author: &discordgo.MessageEmbedAuthor{
-				Name: config.Name,
+				Name: repo.Config.Name,
 			},
 			Color: 0x00ff00,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: config.LogoURL,
+				URL: repo.Config.LogoURL,
 			},
 			Image: &discordgo.MessageEmbedImage{
 				URL:    "https://i.imgur.com/w3duR07.png",
@@ -73,7 +74,7 @@ func HelpMessageHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []
 				},
 			},
 			Footer: &discordgo.MessageEmbedFooter{
-				Text: config.Name,
+				Text: repo.Config.Name,
 			},
 		},
 	}
@@ -83,11 +84,11 @@ func HelpMessageHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []
 			Title:       "Help",
 			Description: "This is a help message",
 			Author: &discordgo.MessageEmbedAuthor{
-				Name: config.Name,
+				Name: repo.Config.Name,
 			},
 			Color: 0x00ff00,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: config.LogoURL,
+				URL: repo.Config.LogoURL,
 			},
 			Image: &discordgo.MessageEmbedImage{
 				URL:    "https://i.imgur.com/w3duR07.png",
@@ -126,7 +127,7 @@ func HelpMessageHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []
 				},
 			},
 			Footer: &discordgo.MessageEmbedFooter{
-				Text: config.Name,
+				Text: repo.Config.Name,
 			},
 		},
 	}

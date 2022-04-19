@@ -7,6 +7,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/dreygur/leaderboardbot/hooks"
 	"github.com/dreygur/leaderboardbot/lib"
+	"github.com/dreygur/leaderboardbot/repo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -26,11 +27,11 @@ func removePointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []
 			Title:       "Remove Point",
 			Description: "Remove point from user",
 			Author: &discordgo.MessageEmbedAuthor{
-				Name: config.Name,
+				Name: repo.Config.Name,
 			},
 			Color: 0xD4122C,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: config.LogoURL,
+				URL: repo.Config.LogoURL,
 			},
 			Fields: []*discordgo.MessageEmbedField{
 				{
@@ -46,11 +47,11 @@ func removePointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []
 			Title:       "Remove Point",
 			Description: "Remove point from user",
 			Author: &discordgo.MessageEmbedAuthor{
-				Name: config.Name,
+				Name: repo.Config.Name,
 			},
 			Color: 0xD4122C,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: config.LogoURL,
+				URL: repo.Config.LogoURL,
 			},
 			Fields: []*discordgo.MessageEmbedField{
 				{
@@ -62,7 +63,7 @@ func removePointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []
 	}
 
 	if hooks.CheckRole(s, i) {
-		_, err := collection.UpdateOne(context.TODO(), bson.M{"username": userName}, bson.M{"$inc": bson.M{"points": -points}}, options.Update().SetUpsert(true))
+		_, err := repo.Collection.UpdateOne(context.TODO(), bson.M{"username": userName}, bson.M{"$inc": bson.M{"points": -points}}, options.Update().SetUpsert(true))
 		if err != nil {
 			lib.PrintLog(fmt.Sprintf("Error in addPointHandler: %v", err), "error")
 		}

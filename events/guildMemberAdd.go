@@ -8,6 +8,7 @@ import (
 	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/hooks"
 	"github.com/dreygur/leaderboardbot/lib"
+	"github.com/dreygur/leaderboardbot/repo"
 )
 
 func GuildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
@@ -39,7 +40,7 @@ func GuildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 	lib.PrintLog(fmt.Sprintf("Inviter of %s is %s", m.User.Username, inviter), "info")
 
 	// Save to Database
-	res, err := collection.InsertOne(context.TODO(), database.User{
+	res, err := repo.Collection.InsertOne(context.TODO(), database.User{
 		UserID:   m.User.ID,
 		Username: m.User.Username,
 		Points:   0,
