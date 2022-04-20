@@ -15,6 +15,13 @@ import (
 )
 
 func main() {
+	// Recover From Panicing
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Error: ", r)
+		}
+	}()
+
 	// godotenv.Load()
 	config := lib.LoadConfig()
 

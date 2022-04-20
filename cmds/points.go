@@ -17,11 +17,14 @@ func pointsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*disc
 		userName = i.Member.User.Username
 	}
 
-	// var user *database.User
-	// err := repo.Collection.FindOne(context.Background(), bson.M{"username": userName}).Decode(&user)
 	user, err := repo.Collection.Find(userName)
 	if err != nil {
 		lib.PrintLog(fmt.Sprintf("Error getting user: %v", err), "error")
+		user, err = repo.CreateIfNotFound(i.Member.User.ID, userName)
+		if err != nil {
+			lib.PrintLog(fmt.Sprintf("Error creating user: %v", err), "error")
+			return nil
+		}
 	}
 
 	forAdmin := []*discordgo.MessageEmbed{
