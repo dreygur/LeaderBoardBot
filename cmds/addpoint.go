@@ -1,7 +1,6 @@
 package cmds
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
@@ -9,7 +8,6 @@ import (
 	"github.com/dreygur/leaderboardbot/lib"
 	"github.com/dreygur/leaderboardbot/repo"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func addPointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*discordgo.MessageEmbed {
@@ -68,11 +66,9 @@ func addPointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*di
 				"points": int(points),
 			},
 		}
-		_, err := repo.Collection.UpdateOne(
-			context.TODO(),
+		err := repo.Collection.Update(
 			bson.M{"user_id": i.Member.User.ID},
 			update,
-			options.Update().SetUpsert(true),
 		)
 
 		if err != nil {

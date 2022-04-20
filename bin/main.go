@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -10,11 +11,21 @@ import (
 	"github.com/dreygur/leaderboardbot/events"
 	"github.com/dreygur/leaderboardbot/handlers"
 	"github.com/dreygur/leaderboardbot/lib"
+	"github.com/dreygur/leaderboardbot/repo"
 )
 
 func main() {
 	// godotenv.Load()
 	config := lib.LoadConfig()
+
+	// Initiate Database Connection First
+	err := repo.Collection.Connect()
+	if err != nil {
+		lib.PrintLog(fmt.Sprintf("Error connecting Database: %v", err), "error")
+		return
+	}
+	defer repo.Collection.Close()
+
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + config.Token)
 	if err != nil {

@@ -1,15 +1,12 @@
 package cmds
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/hooks"
 	"github.com/dreygur/leaderboardbot/lib"
 	"github.com/dreygur/leaderboardbot/repo"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func pointsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*discordgo.MessageEmbed {
@@ -20,8 +17,9 @@ func pointsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*disc
 		userName = i.Member.User.Username
 	}
 
-	var user *database.User
-	err := repo.Collection.FindOne(context.Background(), bson.M{"username": userName}).Decode(&user)
+	// var user *database.User
+	// err := repo.Collection.FindOne(context.Background(), bson.M{"username": userName}).Decode(&user)
+	user, err := repo.Collection.Find(userName)
 	if err != nil {
 		lib.PrintLog(fmt.Sprintf("Error getting user: %v", err), "error")
 	}

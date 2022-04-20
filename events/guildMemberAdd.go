@@ -1,7 +1,6 @@
 package events
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
@@ -39,8 +38,8 @@ func GuildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 	inviter := hooks.CheckInviter(m, invites)
 	lib.PrintLog(fmt.Sprintf("Inviter of %s is %s", m.User.Username, inviter), "info")
 
-	// Save to Database
-	res, err := repo.Collection.InsertOne(context.TODO(), database.User{
+	// Save the user to the database
+	repo.Collection.CreateNewUser(database.User{
 		UserID:   m.User.ID,
 		Username: m.User.Username,
 		Points:   0,
@@ -51,10 +50,23 @@ func GuildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 			Voice:    0,
 		},
 	})
-	if err != nil {
-		lib.PrintLog(fmt.Sprintf("Failed to insert user into database %v", err), "error")
-	}
-	lib.PrintLog(fmt.Sprintf("Inserted user %s into database with ID %v", m.User.Username, res.InsertedID), "info")
+
+	// Save to Database
+	// res, err := repo.Collection.InsertOne(context.TODO(), database.User{
+	// 	UserID:   m.User.ID,
+	// 	Username: m.User.Username,
+	// 	Points:   0,
+	// 	Level:    0,
+	// 	Activities: database.Activity{
+	// 		Text:     0,
+	// 		Reaction: 0,
+	// 		Voice:    0,
+	// 	},
+	// })
+	// if err != nil {
+	// 	lib.PrintLog(fmt.Sprintf("Failed to insert user into database %v", err), "error")
+	// }
+	// lib.PrintLog(fmt.Sprintf("Inserted user %s into database with ID %v", m.User.Username, res.InsertedID), "info")
 
 	// Send DM to the new user
 	// s.ChannelMessageSend(dm.ID, "Hello "+m.User.Username+"!")
