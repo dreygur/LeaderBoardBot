@@ -36,7 +36,7 @@ func main() {
 		lib.PrintLog(fmt.Sprintf("Error connecting Database: %v", err), "error")
 		return
 	}
-	defer repo.Collection.Close()
+	// defer repo.Collection.Close()
 
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + config.Token)
@@ -74,7 +74,7 @@ func main() {
 	// Register Commands
 	handlers.InitCommands(dg)
 	// Remove Commands
-	defer handlers.RemoveCommands(dg)
+	// defer handlers.RemoveCommands(dg)
 
 	go func() {
 		oscall := <-sig
@@ -85,5 +85,5 @@ func main() {
 	}()
 
 	// Stop the bot
-	defer dg.Close()
+	// defer dg.Close()
 }
