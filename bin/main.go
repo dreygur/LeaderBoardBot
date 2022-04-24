@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"syscall"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/dreygur/leaderboardbot/activities"
@@ -15,12 +14,18 @@ import (
 )
 
 func main() {
+	sig := make(chan os.Signal, 1)
+	// signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	signal.Notify(sig, os.Interrupt)
+
+	// <-sig
+
 	// Recover From Panicing
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println("Error: ", r)
-		}
-	}()
+	// defer func() {
+	// 	if r := recover(); r != nil {
+	// 		fmt.Println("Error: ", r)
+	// 	}
+	// }()
 
 	// godotenv.Load()
 	config := lib.LoadConfig()
@@ -69,19 +74,16 @@ func main() {
 	// Register Commands
 	handlers.InitCommands(dg)
 	// Remove Commands
-	// command.RemoveCommands(dg)
+	defer handlers.RemoveCommands(dg)
 
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	<-sig
+	go func() {
+		oscall := <-sig
+		lib.PrintLog(fmt.Sprintf("Received signal: %v", oscall), "info")
+		repo.Collection.Close()
+		handlers.RemoveCommands(dg)
+		dg.Close()
+	}()
 
 	// Stop the bot
 	defer dg.Close()
-
-	/**
-	 * Not Disconnecting Database this time
-	 * Will implement this one in future
-	 * though this is an intended bug!
-	 */
-	// defer database.Disconnect()
 }
