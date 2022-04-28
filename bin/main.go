@@ -14,20 +14,13 @@ import (
 )
 
 func main() {
-	sig := make(chan os.Signal, 1)
-	// signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	signal.Notify(sig, os.Interrupt)
-
-	// <-sig
-
 	// Recover From Panicing
-	// defer func() {
-	// 	if r := recover(); r != nil {
-	// 		fmt.Println("Error: ", r)
-	// 	}
-	// }()
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Error: ", r)
+		}
+	}()
 
-	// godotenv.Load()
 	config := lib.LoadConfig()
 
 	// Initiate Database Connection First
@@ -36,7 +29,6 @@ func main() {
 		lib.PrintLog(fmt.Sprintf("Error connecting Database: %v", err), "error")
 		return
 	}
-	// defer repo.Collection.Close()
 
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + config.Token)
@@ -73,17 +65,15 @@ func main() {
 
 	// Register Commands
 	handlers.InitCommands(dg)
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
+
+	<-sig
+	oscall := <-sig
+	defer lib.PrintLog(fmt.Sprintf("Received signal: %v", oscall), "info")
+	defer repo.Collection.Close()
 	// Remove Commands
-	// defer handlers.RemoveCommands(dg)
-
-	go func() {
-		oscall := <-sig
-		lib.PrintLog(fmt.Sprintf("Received signal: %v", oscall), "info")
-		repo.Collection.Close()
-		handlers.RemoveCommands(dg)
-		dg.Close()
-	}()
-
-	// Stop the bot
-	// defer dg.Close()
+	defer handlers.RemoveCommands(dg)
+	defer dg.Close()
 }
