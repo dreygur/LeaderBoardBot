@@ -70,10 +70,10 @@ func main() {
 	signal.Notify(sig, os.Interrupt)
 
 	<-sig
-	// Disconnect database
-	defer repo.Collection.Close()
-	// Remove Commands
-	defer handlers.RemoveCommands(dg)
 	// Cleanly close down the Discord session.
 	defer dg.Close()
+	// Remove Commands
+	defer handlers.RemoveCommands(dg)
+	// Disconnect database
+	defer repo.Collection.Close()
 }
