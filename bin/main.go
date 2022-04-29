@@ -70,10 +70,10 @@ func main() {
 	signal.Notify(sig, os.Interrupt)
 
 	<-sig
-	oscall := <-sig
-	defer lib.PrintLog(fmt.Sprintf("Received signal: %v", oscall), "info")
+	// Disconnect database
 	defer repo.Collection.Close()
 	// Remove Commands
 	defer handlers.RemoveCommands(dg)
+	// Cleanly close down the Discord session.
 	defer dg.Close()
 }
