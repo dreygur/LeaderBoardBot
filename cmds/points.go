@@ -1,13 +1,30 @@
 package cmds
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/hooks"
 	"github.com/dreygur/leaderboardbot/lib"
 	"github.com/dreygur/leaderboardbot/repo"
 )
+
+func getPoint(i *discordgo.InteractionCreate, userName string) (*database.User, error) {
+	user, err := repo.Collection.Find(userName)
+	if err != nil {
+		lib.PrintLog(fmt.Sprintf("Error getting user: %v", err), "error")
+		user, err = repo.CreateIfNotFound(i.Member.User.ID, userName)
+		if err != nil {
+			errStr := fmt.Sprintf("Error creating user: %v", err)
+			lib.PrintLog(errStr, "error")
+			return nil, errors.New(errStr)
+		}
+	}
+
+	return user, nil
+}
 
 func pointsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*discordgo.MessageEmbed {
 	var userName string
@@ -17,20 +34,10 @@ func pointsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*disc
 		userName = i.Member.User.Username
 	}
 
-	user, err := repo.Collection.Find(userName)
-	if err != nil {
-		lib.PrintLog(fmt.Sprintf("Error getting user: %v", err), "error")
-		user, err = repo.CreateIfNotFound(i.Member.User.ID, userName)
-		if err != nil {
-			lib.PrintLog(fmt.Sprintf("Error creating user: %v", err), "error")
-			return nil
-		}
-	}
-
 	forAdmin := []*discordgo.MessageEmbed{
 		{
 			Title:       "Points",
-			Description: "Points",
+			Description: "Points of current/specified user",
 			Author: &discordgo.MessageEmbedAuthor{
 				Name: repo.Config.Name,
 			},
@@ -46,7 +53,7 @@ func pointsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*disc
 				},
 				{
 					Name:   "Points",
-					Value:  fmt.Sprint(user.Points),
+					Value:  "0",
 					Inline: true,
 				},
 			},
@@ -54,13 +61,17 @@ func pointsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*disc
 	}
 
 	if hooks.CheckRole(s, i) {
+		user, _ := getPoint(i, userName)
+		forAdmin[0].Fields[1].Value = fmt.Sprint(user.Points)
 		return forAdmin
 	}
 
 	if len(i.ApplicationCommandData().Options) > 0 {
 		forAdmin[0].Fields[1].Value = "You have to be admin to see other users' points"
 	} else {
+		user, _ := getPoint(i, userName)
 		forAdmin[0].Fields[0].Value = i.Member.User.Username
+		forAdmin[0].Fields[1].Value = fmt.Sprint(user.Points)
 	}
 
 	return forAdmin
