@@ -2,13 +2,24 @@
 
 ## Todo
 
+- Give points based on activities
+- Level Management based on points
+
+
+## Done
+
 - Track Invites
 - Track User activities
   - Message
   - Reactions
   - Voice Activity
-- Give points based on activities
-- Level Management based on points
 - Slash Commands
-
-## Done
+  - help
+  - addpoint
+  - removepoint
+  - configpoint
+  - play (music)
+  - stop (music)
+  - points
+  - userinvited
+  - github
