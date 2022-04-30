@@ -8,7 +8,7 @@ import (
 	"github.com/dreygur/leaderboardbot/lib"
 )
 
-func GetUsername(s *discordgo.Session, i *discordgo.InteractionCreate) string {
+func GetUser(s *discordgo.Session, i *discordgo.InteractionCreate) (string, string) {
 	var userID string
 	var re = regexp.MustCompile(`(?m)<\@\!(\d.*)>`)
 
@@ -24,6 +24,7 @@ func GetUsername(s *discordgo.Session, i *discordgo.InteractionCreate) string {
 		lib.PrintLog(fmt.Sprintf("Error getting member: %v", err), "error")
 	}
 	userName = member.User.Username
+	profileImage := member.User.AvatarURL("")
 
-	return userName
+	return userName, profileImage
 }

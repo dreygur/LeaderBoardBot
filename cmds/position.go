@@ -10,11 +10,12 @@ import (
 )
 
 func positionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*discordgo.MessageEmbed {
-	var userName string
+	var userName, avatar string
 	if len(i.ApplicationCommandData().Options) > 0 {
-		userName = hooks.GetUsername(s, i)
+		userName, avatar = hooks.GetUser(s, i)
 	} else {
 		userName = i.Member.User.Username
+		avatar = i.Member.User.AvatarURL("")
 	}
 
 	position, err := repo.Collection.GetPosition(userName)
@@ -31,13 +32,13 @@ func positionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*di
 	forAdmin := []*discordgo.MessageEmbed{
 		{
 			Title:       "Position",
-			Description: "Position",
+			Description: "Position of current/specified user",
 			Author: &discordgo.MessageEmbedAuthor{
 				Name: repo.Config.Name,
 			},
 			Color: 0x3349FF,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: repo.Config.LogoURL,
+				URL: avatar,
 			},
 			Fields: []*discordgo.MessageEmbedField{
 				{

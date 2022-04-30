@@ -17,7 +17,7 @@ func removePointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []
 		}
 	}()
 
-	userName := hooks.GetUsername(s, i)
+	userName, avatar := hooks.GetUser(s, i)
 	points := i.ApplicationCommandData().Options[1].IntValue()
 
 	forAdmin := []*discordgo.MessageEmbed{
@@ -29,7 +29,7 @@ func removePointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []
 			},
 			Color: 0xD4122C,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: repo.Config.LogoURL,
+				URL: avatar,
 			},
 			Fields: []*discordgo.MessageEmbedField{
 				{

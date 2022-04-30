@@ -17,7 +17,7 @@ func addPointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*di
 		}
 	}()
 
-	userName := hooks.GetUsername(s, i)
+	userName, avatar := hooks.GetUser(s, i)
 	points := i.ApplicationCommandData().Options[1].IntValue()
 
 	forAdmin := []*discordgo.MessageEmbed{
@@ -29,7 +29,7 @@ func addPointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*di
 			},
 			Color: 0x179ED1,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: repo.Config.LogoURL,
+				URL: avatar,
 			},
 			Fields: []*discordgo.MessageEmbedField{
 				{
