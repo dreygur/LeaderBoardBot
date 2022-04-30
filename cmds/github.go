@@ -42,7 +42,7 @@ func getRepoData(repo string) (repoData, error) {
 	var data repoData
 	json.NewDecoder(res.Body).Decode(&data)
 
-	if data.Count == 0 {
+	if data.Count < 1 {
 		return repoData{}, fmt.Errorf("no repo found")
 	}
 
@@ -59,7 +59,7 @@ func githubHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*disc
 			{
 				Title:       "Error",
 				Description: fmt.Sprint(err, " named ", repoName),
-				Color:       0xFF0000,
+				Color:       0x4682B4,
 			},
 		}
 	}
@@ -77,42 +77,65 @@ func githubHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*disc
 				IconURL: data.Items[0].Owner.Image,
 			},
 			Thumbnail: &discordgo.MessageEmbedThumbnail{URL: data.Items[0].Owner.Image},
-			Fields: []*discordgo.MessageEmbedField{
-				{
-					Name:   "Repository",
-					Value:  fmt.Sprintf("[%s](%s)", data.Items[0].Name, data.Items[0].URL),
-					Inline: true,
-				},
-				{
-					Name:   "Most Used Language",
-					Value:  data.Items[0].Language,
-					Inline: true,
-				},
-				{
-					Name:   "Forks",
-					Value:  fmt.Sprintf("%d", data.Items[0].Forks),
-					Inline: true,
-				},
-				{
-					Name:   "Watchers",
-					Value:  fmt.Sprintf("%d", data.Items[0].Watchers),
-					Inline: true,
-				},
-				{
-					Name:   "Open Issues",
-					Value:  fmt.Sprintf("%d", data.Items[0].Issues),
-					Inline: true,
-				},
-				{
-					Name:   "License",
-					Value:  data.Items[0].License.Name,
-					Inline: true,
-				},
-			},
+			Fields:    []*discordgo.MessageEmbedField{},
 			Footer: &discordgo.MessageEmbedFooter{
 				Text: "Repo created at " + parsedTime.Format("02/01/2006"),
 			},
 		},
+	}
+
+	// Ripository Field
+	if data.Items[0].Name != "" && data.Items[0].URL != "" {
+		message[0].Fields = append(message[0].Fields, &discordgo.MessageEmbedField{
+			Name:   "Repository",
+			Value:  fmt.Sprintf("[%s](%s)", data.Items[0].Name, data.Items[0].URL),
+			Inline: true,
+		})
+	}
+
+	// Most Used Language Field
+	if data.Items[0].Language != "" {
+		message[0].Fields = append(message[0].Fields, &discordgo.MessageEmbedField{
+			Name:   "Most Used Language",
+			Value:  data.Items[0].Language,
+			Inline: true,
+		})
+	}
+
+	// Forks Field
+	if data.Items[0].Forks != 0 {
+		message[0].Fields = append(message[0].Fields, &discordgo.MessageEmbedField{
+			Name:   "Forks",
+			Value:  fmt.Sprintf("%d", data.Items[0].Forks),
+			Inline: true,
+		})
+	}
+
+	// Watchers Field
+	if data.Items[0].Watchers != 0 {
+		message[0].Fields = append(message[0].Fields, &discordgo.MessageEmbedField{
+			Name:   "Watchers",
+			Value:  fmt.Sprintf("%d", data.Items[0].Watchers),
+			Inline: true,
+		})
+	}
+
+	// Open Issues Field
+	if data.Items[0].Issues != 0 {
+		message[0].Fields = append(message[0].Fields, &discordgo.MessageEmbedField{
+			Name:   "Open Issues",
+			Value:  fmt.Sprintf("%d", data.Items[0].Issues),
+			Inline: true,
+		})
+	}
+
+	// License Field
+	if data.Items[0].License.Name != "" {
+		message[0].Fields = append(message[0].Fields, &discordgo.MessageEmbedField{
+			Name:   "License",
+			Value:  data.Items[0].License.Name,
+			Inline: true,
+		})
 	}
 
 	return message
