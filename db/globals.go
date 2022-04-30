@@ -18,7 +18,7 @@ type Database interface {
 	Connect() error
 	CreateNewUser(u database.User) error
 	Find(userName string) (*database.User, error)
-	Add() error
+	GetPosition(userName string) (int, error)
 	Update(target, data primitive.M) error
 	Delete() error
 	Close() error

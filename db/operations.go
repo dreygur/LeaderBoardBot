@@ -3,6 +3,8 @@ package db
 import (
 	"context"
 	"fmt"
+	"log"
+	"sort"
 
 	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/lib"
@@ -22,25 +24,27 @@ func (d *MongoDB) CreateNewUser(u database.User) error {
 	return nil
 }
 
-func (d *MongoDB) Add() error {
-	// res, err := d.Instance.InsertOne(context.Background(), database.User{
-	// 	targets[0]: m.User.ID,
-	// 	Username:   m.User.Username,
-	// 	Points:     0,
-	// 	Level:      0,
-	// 	Activities: database.Activity{
-	// 		Text:     0,
-	// 		Reaction: 0,
-	// 		Voice:    0,
-	// 	},
-	// })
-	// if err != nil {
-	// 	lib.PrintLog(fmt.Sprintf("Failed to insert user into database %v", err), "error")
-	// 	return err
-	// }
-	// lib.PrintLog(fmt.Sprintf("Inserted user %s into database with ID %v", m.User.Username, res.InsertedID), "info")
+func (d *MongoDB) GetPosition(userName string) (int, error) {
+	cursor, err := d.Instance.Find(context.TODO(), bson.M{})
+	if err != nil {
+		return 0, err
+	}
 
-	return nil
+	var users []*database.User
+	if err = cursor.All(context.TODO(), &users); err != nil {
+		log.Fatal(err)
+	}
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].Points > users[j].Points
+	})
+
+	for i, user := range users {
+		if user.Username == userName {
+			return i + 1, nil
+		}
+	}
+
+	return 0, fmt.Errorf("user %s not found", userName)
 }
 
 func (d *MongoDB) Update(target, data primitive.M) error {

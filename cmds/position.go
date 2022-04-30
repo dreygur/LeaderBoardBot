@@ -1,8 +1,11 @@
 package cmds
 
 import (
+	"fmt"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/dreygur/leaderboardbot/hooks"
+	"github.com/dreygur/leaderboardbot/lib"
 	"github.com/dreygur/leaderboardbot/repo"
 )
 
@@ -12,6 +15,17 @@ func positionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*di
 		userName = hooks.GetUsername(s, i)
 	} else {
 		userName = i.Member.User.Username
+	}
+
+	position, err := repo.Collection.GetPosition(userName)
+	if err != nil {
+		lib.PrintLog(fmt.Sprintf("Error getting position: %v", err), "error")
+		return []*discordgo.MessageEmbed{
+			{
+				Title:       "Position",
+				Description: "Position of current/specified user not found",
+			},
+		}
 	}
 
 	forAdmin := []*discordgo.MessageEmbed{
@@ -33,7 +47,7 @@ func positionHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*di
 				},
 				{
 					Name:   "Position",
-					Value:  "5",
+					Value:  fmt.Sprint(position),
 					Inline: true,
 				},
 			},
