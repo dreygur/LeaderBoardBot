@@ -22,9 +22,16 @@ func GetMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		fmt.Println(err)
 	}
 
+	// Check if the user is in a voice channel1
 	if len(g.VoiceStates) == 0 {
 		voiceNotConnected(s, i)
 		return
+	}
+
+	// Switch to new Song
+	if len(g.VoiceStates) > 1 && s.VoiceConnections[i.GuildID] != nil {
+		s.VoiceConnections[i.GuildID].Speaking(false)
+		s.VoiceConnections[i.GuildID].Disconnect()
 	}
 
 	url := i.ApplicationCommandData().Options[0].StringValue()
@@ -42,19 +49,18 @@ func GetMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		return
 	}
 
-	go func(title string) {
-		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Embeds: []*discordgo.MessageEmbed{
-					{
-						Title:       "Music",
-						Description: "Playing " + title,
-					},
+	// Playing Response
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title:       "Music",
+					Description: "Playing " + yt.Title,
 				},
 			},
-		})
-	}(yt.Title)
+		},
+	})
 
 	dgv, err := s.ChannelVoiceJoin(i.GuildID, g.VoiceStates[0].ChannelID, false, true)
 	if err != nil {
