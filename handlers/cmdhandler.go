@@ -41,7 +41,7 @@ var CommandHandlers = map[string]func(s *discordgo.Session, i *discordgo.Interac
 	"position":     cmds.Position,
 	"userinvited":  cmds.UserInvited,
 	"configpoints": cmds.ConfigPoint,
-	"play":         cmds.GetMusic,
+	"play":         cmds.PlayMusic,
 	"stop":         cmds.StopMusic,
 	"pause":        cmds.PauseMusic,
 	"github":       cmds.Github,

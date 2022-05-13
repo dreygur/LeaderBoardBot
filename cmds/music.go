@@ -16,7 +16,7 @@ type Youtube struct {
 	} `json:"formats"`
 }
 
-func GetMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func PlayMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	g, err := s.State.Guild(i.GuildID)
 	if err != nil {
 		fmt.Println(err)
@@ -49,6 +49,13 @@ func GetMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		return
 	}
 
+	dgv, err := s.ChannelVoiceJoin(i.GuildID, g.VoiceStates[0].ChannelID, false, true)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	dgvoice.PlayAudioFile(dgv, yt.Formats[0].URL, make(<-chan bool))
+
 	// Playing Response
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -61,14 +68,6 @@ func GetMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			},
 		},
 	})
-
-	dgv, err := s.ChannelVoiceJoin(i.GuildID, g.VoiceStates[0].ChannelID, false, true)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	dgvoice.PlayAudioFile(dgv, yt.Formats[0].URL, make(<-chan bool))
 }
 
 func StopMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
