@@ -21,6 +21,8 @@ func PlayMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	// URL from interaction
+	url := i.ApplicationCommandData().Options[0].StringValue()
 
 	// Check if the user is in a voice channel1
 	if len(g.VoiceStates) == 0 {
@@ -28,13 +30,25 @@ func PlayMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		return
 	}
 
+	// Playing Response
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title:       "Music",
+					Description: "Playing music from " + url,
+				},
+			},
+		},
+	})
+
 	// Switch to new Song
 	if len(g.VoiceStates) > 1 && s.VoiceConnections[i.GuildID] != nil {
 		s.VoiceConnections[i.GuildID].Speaking(false)
 		s.VoiceConnections[i.GuildID].Disconnect()
 	}
 
-	url := i.ApplicationCommandData().Options[0].StringValue()
 	cmd := exec.Command("youtube-dl", url, "--skip-download", "--print-json")
 	stdout, err := cmd.Output()
 
@@ -56,18 +70,6 @@ func PlayMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	}
 	dgvoice.PlayAudioFile(dgv, yt.Formats[0].URL, make(<-chan bool))
 
-	// Playing Response
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{
-				{
-					Title:       "Music",
-					Description: "Playing " + yt.Title,
-				},
-			},
-		},
-	})
 }
 
 func StopMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
