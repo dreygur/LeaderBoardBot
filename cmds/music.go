@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/bwmarrin/dgvoice"
 	"github.com/bwmarrin/discordgo"
@@ -48,6 +49,9 @@ func PlayMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		s.VoiceConnections[i.GuildID].Speaking(false)
 		s.VoiceConnections[i.GuildID].Disconnect()
 	}
+
+	// Just the url, nothing else
+	url = strings.Split(url, "&")[0]
 
 	cmd := exec.Command("youtube-dl", url, "--skip-download", "--print-json")
 	stdout, err := cmd.Output()
