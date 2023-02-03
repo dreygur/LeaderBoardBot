@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"path"
 	"strings"
 
 	"github.com/bwmarrin/dgvoice"
@@ -53,7 +54,7 @@ func PlayMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	// Just the url, nothing else
 	url = strings.Split(url, "&")[0]
 
-	cmd := exec.Command("youtube-dl", url, "--skip-download", "--print-json")
+	cmd := exec.Command(path.Join("..", "extra", "youtube-dl"), url, "--skip-download", "--print-json")
 	stdout, err := cmd.Output()
 
 	if err != nil {
