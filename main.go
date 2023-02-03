@@ -73,7 +73,7 @@ func main() {
 	// Cleanly close down the Discord session.
 	defer dg.Close()
 	// Remove Commands
-	// defer handlers.RemoveCommands(dg)
+	defer handlers.RemoveCommands(dg)
 	// Disconnect database
 	defer repo.Collection.Close()
 }
