@@ -127,4 +127,16 @@ var Commands = []*discordgo.ApplicationCommand{
 		Name:        "pause",
 		Description: "Pauses playing music",
 	},
+	{
+		Name:        "github",
+		Description: "Get info on a Github repository",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "repository",
+				Description: "Enter the repository name",
+				Required:    true,
+			},
+		},
+	},
 }

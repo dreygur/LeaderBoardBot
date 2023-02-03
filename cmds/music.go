@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/bwmarrin/dgvoice"
 	"github.com/bwmarrin/discordgo"
-	ytdl "github.com/kkdai/youtube/v2"
 )
 
 type Youtube struct {
@@ -17,28 +17,42 @@ type Youtube struct {
 	} `json:"formats"`
 }
 
-func GetMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func PlayMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	g, err := s.State.Guild(i.GuildID)
 	if err != nil {
 		fmt.Println(err)
 	}
+	// URL from interaction
+	url := i.ApplicationCommandData().Options[0].StringValue()
 
+	// Check if the user is in a voice channel1
 	if len(g.VoiceStates) == 0 {
-		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Embeds: []*discordgo.MessageEmbed{
-					{
-						Title:       "Music",
-						Description: "Please connect to a voice channel to play music",
-					},
-				},
-			},
-		})
+		voiceNotConnected(s, i)
 		return
 	}
 
-	url := i.ApplicationCommandData().Options[0].StringValue()
+	// Playing Response
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Title:       "Music",
+					Description: "Playing music from " + url,
+				},
+			},
+		},
+	})
+
+	// Switch to new Song
+	if len(g.VoiceStates) > 1 && s.VoiceConnections[i.GuildID] != nil {
+		s.VoiceConnections[i.GuildID].Speaking(false)
+		s.VoiceConnections[i.GuildID].Disconnect()
+	}
+
+	// Just the url, nothing else
+	url = strings.Split(url, "&")[0]
+
 	cmd := exec.Command("youtube-dl", url, "--skip-download", "--print-json")
 	stdout, err := cmd.Output()
 
@@ -53,27 +67,13 @@ func GetMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		return
 	}
 
-	go func() {
-		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Embeds: []*discordgo.MessageEmbed{
-					{
-						Title:       "Music",
-						Description: "Playing " + yt.Title,
-					},
-				},
-			},
-		})
-	}()
-
 	dgv, err := s.ChannelVoiceJoin(i.GuildID, g.VoiceStates[0].ChannelID, false, true)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-
 	dgvoice.PlayAudioFile(dgv, yt.Formats[0].URL, make(<-chan bool))
+
 }
 
 func StopMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -98,17 +98,7 @@ func StopMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		return
 	}
 
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{
-				{
-					Title:       "Music",
-					Description: "Voice not connected!",
-				},
-			},
-		},
-	})
+	voiceNotConnected(s, i)
 }
 
 func PauseMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -131,41 +121,19 @@ func PauseMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		return
 	}
 
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{
-				{
-					Title:       "Music",
-					Description: "Voice not connected!",
-				},
-			},
-		},
-	})
+	voiceNotConnected(s, i)
 }
 
-func FetchMusic(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	yt := ytdl.Client{
-		Debug: false,
-	}
-
-	video, err := yt.GetVideo("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-	if err != nil {
-		fmt.Println(err)
-	}
-	audio := video.Formats.WithAudioChannels()
-	fmt.Println(audio[0].Cipher)
-
+func voiceNotConnected(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Title:       "Music",
-					Description: "Music",
+					Description: "Voice not connected!\nPlease connect to a voice channel to play music",
 				},
 			},
 		},
 	})
-
 }

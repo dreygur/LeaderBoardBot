@@ -1,20 +1,35 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
-	"syscall"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/dreygur/leaderboardbot/activities"
 	"github.com/dreygur/leaderboardbot/events"
 	"github.com/dreygur/leaderboardbot/handlers"
 	"github.com/dreygur/leaderboardbot/lib"
+	"github.com/dreygur/leaderboardbot/repo"
 )
 
 func main() {
-	// godotenv.Load()
+	// Recover From Panicing
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Error: ", r)
+		}
+	}()
+
 	config := lib.LoadConfig()
+
+	// Initiate Database Connection First
+	err := repo.Collection.Connect()
+	if err != nil {
+		lib.PrintLog(fmt.Sprintf("Error connecting Database: %v", err), "error")
+		return
+	}
+
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + config.Token)
 	if err != nil {
@@ -50,20 +65,15 @@ func main() {
 
 	// Register Commands
 	handlers.InitCommands(dg)
-	// Remove Commands
-	// command.RemoveCommands(dg)
 
 	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	signal.Notify(sig, os.Interrupt)
+
 	<-sig
-
-	// Stop the bot
+	// Cleanly close down the Discord session.
 	defer dg.Close()
-
-	/**
-	 * Not Disconnecting Database this time
-	 * Will implement this one in future
-	 * though this is an intended bug!
-	 */
-	// defer database.Disconnect()
+	// Remove Commands
+	defer handlers.RemoveCommands(dg)
+	// Disconnect database
+	defer repo.Collection.Close()
 }

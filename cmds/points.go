@@ -1,7 +1,7 @@
 package cmds
 
 import (
-	"context"
+	"errors"
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
@@ -9,33 +9,42 @@ import (
 	"github.com/dreygur/leaderboardbot/hooks"
 	"github.com/dreygur/leaderboardbot/lib"
 	"github.com/dreygur/leaderboardbot/repo"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
-func pointsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*discordgo.MessageEmbed {
-	var userName string
-	if len(i.ApplicationCommandData().Options) > 0 {
-		userName = hooks.GetUsername(s, i)
-	} else {
-		userName = i.Member.User.Username
-	}
-
-	var user *database.User
-	err := repo.Collection.FindOne(context.Background(), bson.M{"username": userName}).Decode(&user)
+func getPoint(i *discordgo.InteractionCreate, userName string) (*database.User, error) {
+	user, err := repo.Collection.Find(userName)
 	if err != nil {
 		lib.PrintLog(fmt.Sprintf("Error getting user: %v", err), "error")
+		user, err = repo.CreateIfNotFound(i.Member.User.ID, userName)
+		if err != nil {
+			errStr := fmt.Sprintf("Error creating user: %v", err)
+			lib.PrintLog(errStr, "error")
+			return nil, errors.New(errStr)
+		}
+	}
+
+	return user, nil
+}
+
+func pointsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*discordgo.MessageEmbed {
+	var userName, avatar string
+	if len(i.ApplicationCommandData().Options) > 0 {
+		userName, avatar = hooks.GetUser(s, i)
+	} else {
+		userName = i.Member.User.Username
+		avatar = i.Member.User.AvatarURL("")
 	}
 
 	forAdmin := []*discordgo.MessageEmbed{
 		{
 			Title:       "Points",
-			Description: "Points",
+			Description: "Points of current/specified user",
 			Author: &discordgo.MessageEmbedAuthor{
 				Name: repo.Config.Name,
 			},
 			Color: 0x3349FF,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: repo.Config.LogoURL,
+				URL: avatar,
 			},
 			Fields: []*discordgo.MessageEmbedField{
 				{
@@ -45,7 +54,7 @@ func pointsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*disc
 				},
 				{
 					Name:   "Points",
-					Value:  fmt.Sprint(user.Points),
+					Value:  "0",
 					Inline: true,
 				},
 			},
@@ -53,13 +62,17 @@ func pointsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*disc
 	}
 
 	if hooks.CheckRole(s, i) {
+		user, _ := getPoint(i, userName)
+		forAdmin[0].Fields[1].Value = fmt.Sprint(user.Points)
 		return forAdmin
 	}
 
 	if len(i.ApplicationCommandData().Options) > 0 {
 		forAdmin[0].Fields[1].Value = "You have to be admin to see other users' points"
 	} else {
+		user, _ := getPoint(i, userName)
 		forAdmin[0].Fields[0].Value = i.Member.User.Username
+		forAdmin[0].Fields[1].Value = fmt.Sprint(user.Points)
 	}
 
 	return forAdmin

@@ -1,14 +1,12 @@
 package activities
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/dreygur/leaderboardbot/lib"
 	"github.com/dreygur/leaderboardbot/repo"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func ReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
@@ -25,12 +23,14 @@ func ReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 		},
 	}
 
-	_, err := repo.Collection.UpdateOne(
-		context.TODO(),
-		bson.M{"user_id": m.UserID},
-		update,
-		options.Update().SetUpsert(true),
-	)
+	// _, err := repo.Collection.UpdateOne(
+	// 	context.TODO(),
+	// 	bson.M{"user_id": m.UserID},
+	// 	update,
+	// 	options.Update().SetUpsert(true),
+	// )
+
+	err := repo.Collection.Update(bson.M{"user_id": m.UserID}, update)
 
 	if err != nil {
 		lib.PrintLog(fmt.Sprintf("Error in addPointHandler: %v", err), "error")

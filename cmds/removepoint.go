@@ -1,7 +1,6 @@
 package cmds
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
@@ -9,7 +8,6 @@ import (
 	"github.com/dreygur/leaderboardbot/lib"
 	"github.com/dreygur/leaderboardbot/repo"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func removePointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*discordgo.MessageEmbed {
@@ -19,7 +17,7 @@ func removePointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []
 		}
 	}()
 
-	userName := hooks.GetUsername(s, i)
+	userName, avatar := hooks.GetUser(s, i)
 	points := i.ApplicationCommandData().Options[1].IntValue()
 
 	forAdmin := []*discordgo.MessageEmbed{
@@ -31,7 +29,7 @@ func removePointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []
 			},
 			Color: 0xD4122C,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: repo.Config.LogoURL,
+				URL: avatar,
 			},
 			Fields: []*discordgo.MessageEmbedField{
 				{
@@ -63,7 +61,8 @@ func removePointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []
 	}
 
 	if hooks.CheckRole(s, i) {
-		_, err := repo.Collection.UpdateOne(context.TODO(), bson.M{"username": userName}, bson.M{"$inc": bson.M{"points": -points}}, options.Update().SetUpsert(true))
+		// _, err := repo.Collection.UpdateOne(context.TODO(), bson.M{"username": userName}, bson.M{"$inc": bson.M{"points": -points}}, options.Update().SetUpsert(true))
+		err := repo.Collection.Update(bson.M{"username": userName}, bson.M{"$inc": bson.M{"points": -points}})
 		if err != nil {
 			lib.PrintLog(fmt.Sprintf("Error in addPointHandler: %v", err), "error")
 		}
