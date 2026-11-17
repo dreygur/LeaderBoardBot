@@ -6,6 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/dreygur/leaderboardbot/hooks"
 	"github.com/dreygur/leaderboardbot/lib"
+	"github.com/dreygur/leaderboardbot/mention"
 	"github.com/dreygur/leaderboardbot/repo"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -62,7 +63,8 @@ func removePointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []
 
 	if hooks.CheckRole(s, i) {
 		// _, err := repo.Collection.UpdateOne(context.TODO(), bson.M{"username": userName}, bson.M{"$inc": bson.M{"points": -points}}, options.Update().SetUpsert(true))
-		err := repo.Collection.Update(bson.M{"username": userName}, bson.M{"$inc": bson.M{"points": -points}})
+		targetID := mention.UserID(i.ApplicationCommandData().Options[0].StringValue())
+		_, err := repo.Award(targetID, bson.M{"points": -points})
 		if err != nil {
 			lib.PrintLog(fmt.Sprintf("Error in addPointHandler: %v", err), "error")
 		}

@@ -61,6 +61,21 @@ func (d *MongoDB) Update(target, data bson.M) error {
 	return nil
 }
 
+// Increment applies data to the user matching target, creating the user if
+// missing, and returns the document after the change so callers can act on
+// the new totals without a second read.
+func (d *MongoDB) Increment(target, data bson.M) (*database.User, error) {
+	opts := options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After)
+
+	var user database.User
+	err := d.Instance.FindOneAndUpdate(context.TODO(), target, data, opts).Decode(&user)
+	if err != nil {
+		return nil, fmt.Errorf("increment user %v: %w", target, err)
+	}
+
+	return &user, nil
+}
+
 func (d *MongoDB) Delete() error {
 	return nil
 }

@@ -3,6 +3,7 @@ package events
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/dreygur/leaderboardbot/lib"
+	"github.com/dreygur/leaderboardbot/scoring"
 )
 
 func LoginEvent(s *discordgo.Session, r *discordgo.Ready) {
@@ -18,6 +19,6 @@ func LoginEvent(s *discordgo.Session, r *discordgo.Ready) {
 			lib.PrintLog("Failed to get invites for "+v.ID, "error")
 			return
 		}
-		lib.INVITES[v.ID] = invites
+		scoring.Invites.Set(v.ID, invites)
 	}
 }

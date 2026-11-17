@@ -20,6 +20,7 @@ type Database interface {
 	Find(userName string) (*database.User, error)
 	GetPosition(userName string) (int, error)
 	Update(target, data bson.M) error
+	Increment(target, data bson.M) (*database.User, error)
 	Delete() error
 	Close() error
 }

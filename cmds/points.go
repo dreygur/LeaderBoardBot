@@ -57,6 +57,11 @@ func pointsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*disc
 					Value:  "0",
 					Inline: true,
 				},
+				{
+					Name:   "Level",
+					Value:  "0",
+					Inline: true,
+				},
 			},
 		},
 	}
@@ -64,15 +69,18 @@ func pointsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*disc
 	if hooks.CheckRole(s, i) {
 		user, _ := getPoint(i, userName)
 		forAdmin[0].Fields[1].Value = fmt.Sprint(user.Points)
+		forAdmin[0].Fields[2].Value = fmt.Sprint(user.Level)
 		return forAdmin
 	}
 
 	if len(i.ApplicationCommandData().Options) > 0 {
 		forAdmin[0].Fields[1].Value = "You have to be admin to see other users' points"
+		forAdmin[0].Fields = forAdmin[0].Fields[:2]
 	} else {
 		user, _ := getPoint(i, userName)
 		forAdmin[0].Fields[0].Value = i.Member.User.Username
 		forAdmin[0].Fields[1].Value = fmt.Sprint(user.Points)
+		forAdmin[0].Fields[2].Value = fmt.Sprint(user.Level)
 	}
 
 	return forAdmin

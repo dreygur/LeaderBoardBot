@@ -8,7 +8,22 @@ import (
 	"github.com/dreygur/leaderboardbot/hooks"
 	"github.com/dreygur/leaderboardbot/lib"
 	"github.com/dreygur/leaderboardbot/repo"
+	"github.com/dreygur/leaderboardbot/scoring"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
+
+func awardInvite(s *discordgo.Session, inviterID string) {
+	level, err := repo.Award(inviterID, bson.M{
+		"points":  lib.POINTS["invite"],
+		"invites": 1,
+	})
+	if err != nil {
+		lib.PrintLog(fmt.Sprintf("Error awarding invite points: %v", err), "error")
+	}
+	if level > 0 {
+		hooks.DMLevel(s, inviterID, level)
+	}
+}
 
 func GuildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 	// Log the new Username to Console
@@ -20,23 +35,26 @@ func GuildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 		return
 	}
 
-	// Create a Private Channel with the user to send DM
-	dm, err := s.UserChannelCreate(m.User.ID)
-	if err != nil {
-		lib.PrintLog("Failed to create DM channel for "+m.User.Username, "error")
-		return
-	}
-
-	// Invite ID
+	// Invites run before the DM so a member with closed DMs still credits
+	// their inviter and keeps the cached use counts current.
 	invites, err := s.GuildInvites(m.GuildID)
 	if err != nil {
 		lib.PrintLog("Failed to get invites for "+m.GuildID, "error")
 		return
 	}
 
-	// The the inviter of the invite
-	inviter := hooks.CheckInviter(m, invites)
-	lib.PrintLog(fmt.Sprintf("Inviter of %s is %s", m.User.Username, inviter), "info")
+	inviter := scoring.Invites.Used(m.GuildID, invites)
+	if inviter != nil {
+		lib.PrintLog(fmt.Sprintf("Inviter of %s is %s", m.User.Username, inviter.Username), "info")
+		awardInvite(s, inviter.ID)
+	}
+
+	// Create a Private Channel with the user to send DM
+	dm, err := s.UserChannelCreate(m.User.ID)
+	if err != nil {
+		lib.PrintLog("Failed to create DM channel for "+m.User.Username, "error")
+		return
+	}
 
 	// Save the user to the database
 	repo.Collection.CreateNewUser(database.User{

@@ -1,10 +1,7 @@
 package lib
 
-import "github.com/bwmarrin/discordgo"
-
 var BOT_NAME string = "LeaderboardBot"
 var LOGO_URL string = "https://i.imgur.com/wSTFkRM.png"
-var INVITES = make(map[string][]*discordgo.Invite)
 var ACTIVITIES = []string{"text", "reaction", "voice"}
 var POINTS = make(map[string]int)
 
