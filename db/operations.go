@@ -76,6 +76,23 @@ func (d *MongoDB) Increment(target, data bson.M) (*database.User, error) {
 	return &user, nil
 }
 
+// Register creates the user unless one with userID already exists, and
+// reports whether it did. Records outlive leaving the server, so this is
+// true only on a user's first ever join.
+func (d *MongoDB) Register(userID, userName string) (bool, error) {
+	res, err := d.Instance.UpdateOne(
+		context.TODO(),
+		bson.M{"user_id": userID},
+		bson.M{"$setOnInsert": bson.M{"username": userName}},
+		options.UpdateOne().SetUpsert(true),
+	)
+	if err != nil {
+		return false, fmt.Errorf("register user %s: %w", userID, err)
+	}
+
+	return res.UpsertedCount == 1, nil
+}
+
 func (d *MongoDB) Delete() error {
 	return nil
 }

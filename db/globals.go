@@ -21,6 +21,7 @@ type Database interface {
 	GetPosition(userName string) (int, error)
 	Update(target, data bson.M) error
 	Increment(target, data bson.M) (*database.User, error)
+	Register(userID, userName string) (bool, error)
 	Delete() error
 	Close() error
 }
