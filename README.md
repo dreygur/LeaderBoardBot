@@ -2,8 +2,8 @@
 
 ## Todo
 
-- [ ] Give points based on activities
-- [ ] Level Management based on points
+- [x] Give points based on activities
+- [x] Level Management based on points
 - [x] Track Invites
 - [x] Track User activities
   - [x] Message
