@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/hooks"
 	"github.com/dreygur/leaderboardbot/lib"
 	"github.com/dreygur/leaderboardbot/repo"
@@ -43,8 +42,15 @@ func GuildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 		return
 	}
 
+	// Only a first ever join pays the inviter; otherwise leaving and
+	// rejoining with an alt account farms invite points.
+	firstJoin, err := repo.Collection.Register(m.User.ID, m.User.Username)
+	if err != nil {
+		lib.PrintLog(fmt.Sprintf("Failed to register %s: %v", m.User.Username, err), "error")
+	}
+
 	inviter := scoring.Invites.Used(m.GuildID, invites)
-	if inviter != nil {
+	if inviter != nil && firstJoin {
 		lib.PrintLog(fmt.Sprintf("Inviter of %s is %s", m.User.Username, inviter.Username), "info")
 		awardInvite(s, inviter.ID)
 	}
@@ -55,19 +61,6 @@ func GuildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 		lib.PrintLog("Failed to create DM channel for "+m.User.Username, "error")
 		return
 	}
-
-	// Save the user to the database
-	repo.Collection.CreateNewUser(database.User{
-		UserID:   m.User.ID,
-		Username: m.User.Username,
-		Points:   0,
-		Level:    0,
-		Activities: database.Activity{
-			Text:     0,
-			Reaction: 0,
-			Voice:    0,
-		},
-	})
 
 	// Save to Database
 	// res, err := repo.Collection.InsertOne(context.TODO(), database.User{
