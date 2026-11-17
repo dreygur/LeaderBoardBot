@@ -6,6 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/dreygur/leaderboardbot/hooks"
 	"github.com/dreygur/leaderboardbot/lib"
+	"github.com/dreygur/leaderboardbot/mention"
 	"github.com/dreygur/leaderboardbot/repo"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -61,18 +62,14 @@ func addPointHandler(s *discordgo.Session, i *discordgo.InteractionCreate) []*di
 	}
 
 	if hooks.CheckRole(s, i) {
-		update := bson.M{
-			"$inc": bson.M{
-				"points": int(points),
-			},
-		}
-		err := repo.Collection.Update(
-			bson.M{"user_id": i.Member.User.ID},
-			update,
-		)
+		targetID := mention.UserID(i.ApplicationCommandData().Options[0].StringValue())
+		level, err := repo.Award(targetID, bson.M{"points": int(points)})
 
 		if err != nil {
 			lib.PrintLog(fmt.Sprintf("Error in addPointHandler: %v", err), "error")
+		}
+		if level > 0 {
+			hooks.AnnounceLevel(s, i.ChannelID, targetID, level)
 		}
 
 		lib.PrintLog(fmt.Sprintf("Updated user: %s", userName), "info")
