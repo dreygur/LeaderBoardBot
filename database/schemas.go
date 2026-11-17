@@ -1,16 +1,16 @@
 package database
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import "go.mongodb.org/mongo-driver/v2/bson"
 
 type User struct {
-	ID         primitive.ObjectID `bson:"_id,omitempty"`
-	Username   string             `bson:"username,omitempty"`
-	UserID     string             `bson:"user_id,omitempty"`
-	NameHash   string             `bson:"name_hash,omitempty"`
-	Level      int                `bson:"level,omitempty"`
-	Points     int                `bson:"points,omitempty"`
-	Invites    int                `bson:"invites,omitempty"`
-	Activities Activity           `bson:"activities,omitempty"`
+	ID         bson.ObjectID `bson:"_id,omitempty"`
+	Username   string        `bson:"username,omitempty"`
+	UserID     string        `bson:"user_id,omitempty"`
+	NameHash   string        `bson:"name_hash,omitempty"`
+	Level      int           `bson:"level,omitempty"`
+	Points     int           `bson:"points,omitempty"`
+	Invites    int           `bson:"invites,omitempty"`
+	Activities Activity      `bson:"activities,omitempty"`
 }
 
 type Activity struct {

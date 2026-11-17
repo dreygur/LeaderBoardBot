@@ -6,14 +6,14 @@ import (
 	"time"
 
 	"github.com/dreygur/leaderboardbot/lib"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 func (d *MongoDB) Connect() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	d.Client, err = mongo.Connect(ctx, options.Client().ApplyURI(d.Address))
+	d.Client, err = mongo.Connect(options.Client().ApplyURI(d.Address))
 	if err != nil {
 		lib.PrintLog(fmt.Sprintf("Error connecting to database: %v", err), "error")
 		return err

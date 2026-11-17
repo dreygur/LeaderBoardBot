@@ -3,8 +3,8 @@ package db
 import (
 	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/lib"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 var (
@@ -19,7 +19,7 @@ type Database interface {
 	CreateNewUser(u database.User) error
 	Find(userName string) (*database.User, error)
 	GetPosition(userName string) (int, error)
-	Update(target, data primitive.M) error
+	Update(target, data bson.M) error
 	Delete() error
 	Close() error
 }
