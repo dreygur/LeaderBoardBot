@@ -8,9 +8,8 @@ import (
 
 	"github.com/dreygur/leaderboardbot/database"
 	"github.com/dreygur/leaderboardbot/lib"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 func (d *MongoDB) CreateNewUser(u database.User) error {
@@ -47,12 +46,12 @@ func (d *MongoDB) GetPosition(userName string) (int, error) {
 	return 0, fmt.Errorf("user %s not found", userName)
 }
 
-func (d *MongoDB) Update(target, data primitive.M) error {
+func (d *MongoDB) Update(target, data bson.M) error {
 	_, err := d.Instance.UpdateOne(
 		context.TODO(),
 		target,
 		data,
-		options.Update().SetUpsert(true),
+		options.UpdateOne().SetUpsert(true),
 	)
 
 	if err != nil {
